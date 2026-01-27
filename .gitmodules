@@ -1,0 +1,4 @@
+[submodule "tutorial_VITAL_2026/circulatory_autogen"]
+	path = tutorial_VITAL_2026/circulatory_autogen
+	url = https://github.com/FinbarArgus/circulatory_autogen.git
+	branch = devel_interactive_tutorial

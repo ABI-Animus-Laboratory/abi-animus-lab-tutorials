@@ -1,0 +1,14 @@
+services:
+  opencor-tutorial:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: opencor-tutorial
+    ports:
+      - "8888:8888"
+    volumes:
+      # Mount current directory to persist notebook changes
+      - .:/tutorials
+    environment:
+      - JUPYTER_ENABLE_LAB=no
+    restart: unless-stopped
