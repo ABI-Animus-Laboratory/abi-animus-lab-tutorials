@@ -1,0 +1,21 @@
+### Install Spack (https://spack.readthedocs.io/en/latest/getting_started.html#installation)
+# see instructions in "../SUNDIALS_CVODES/SUNDIALS_HOWTO.txt"
+
+### Install nlohmann-json (https://github.com/nlohmann/json)
+# One option is to install nlohmann-json with Spack
+$ spack install nlohmann-json
+# Check the installation path
+$ spack location -i nlohmann-json
+
+# Load the environment for the Spack-installed packages (not needed here)
+$ spack load nlohmann-json
+
+# When compiling, specify the path "/abs_path_to_spack/include" where to look for header files, like "#include <nlohmann/json.hpp>"
+# either directly in the compile command
+$ g++ -o coupler coupler.cpp -I$(spack location -i sundials)/include
+# on in a Makefile
+JSON_PREFIX := $(shell spack location -i nlohmann-json)
+INC_DIR = -I$(JSON_PREFIX)/include
+CXXFLAGS = $(INC_DIR)
+### SEE example of Makefile in this folder
+

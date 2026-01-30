@@ -1,0 +1,46 @@
+### Install Spack (https://spack.readthedocs.io/en/latest/getting_started.html#installation)
+# System prerequisites (Ubuntu)
+$ apt update
+$ apt install bzip2 ca-certificates g++ gcc gfortran git gzip lsb-release patch python3 tar unzip xz-utils zstd
+# Installation
+$ git clone -c feature.manyFiles=true --depth=2 https://github.com/spack/spack.git
+# Shell support for bash/zsh/sh
+$ . spack/share/spack/setup-env.sh # to source the appropriate script for your shell
+# To source Spack in every shell session, modify your shell’s startup file
+$ echo "source ~/spack/share/spack/setup-env.sh" >> ~/.bashrc   # or ~/.zshrc
+$ source ~/.bashrc   # or ~/.zshrc # or restart the terminal
+
+### Use Spack
+# Check the installation path
+$ spack location -i sundials
+
+### Install SUNDIALS with Spack
+$ spack install sundials # default version of SUNDIALS supporting MPI
+$ spack install sundials ~mpi # serial version of SUNDIALS
+# Additional options can be enabled through various Spack package variants
+$ spack info sundials # to check the available variants
+# Load SUNDIALS
+$ spack load sundials
+$ spack load sundials~mpi
+# To auto-load SUNDIALS in every shell, modify your shell’s startup file
+$ echo "spack load sundials" >> ~/.bashrc  # or ~/.zshrc
+$ source ~/.bashrc   # or ~/.zshrc # or restart the terminal
+
+### Set LD_LIBRARY_PATH
+# To set LD_LIBRARY_PATH to include SUNDIALS, run the following command in your terminal before compiling
+$ export LD_LIBRARY_PATH=$(spack location -i sundials)/lib:$LD_LIBRARY_PATH
+# To make this permanent across terminal sessions, add the export command to your shell's startup file
+# Open the file with a text editor
+$ nano ~/.bashrc   # or ~/.zshrc
+# Add this line at the end of the file, save and exit (in nano, Ctrl + X)
+export LD_LIBRARY_PATH=$(spack location -i sundials)/lib:$LD_LIBRARY_PATH
+# Reload the shell
+$ source ~/.bashrc   # or ~/.zshrc
+
+### Link the needed SUNDIALS libraries
+# The compile command/the Makefile must include the necessary SUNDIALS libraries
+# To list the libraries in your SUNDIALS install
+$ ls $(spack location -i sundials)/lib
+
+### SEE examples of Makefile and bash script for compiling and executing a C++ program
+

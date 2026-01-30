@@ -1,0 +1,99 @@
+### Installing PETSc on Ubuntu 24.04 from source (recommended for latest version, e.g., 3.24+)
+# System prerequisites (Ubuntu)
+$ sudo apt update
+$ sudo apt install build-essential cmake git gfortran libopenmpi-dev openmpi-bin libblas-dev liblapack-dev libmpich-dev python3-pip
+$ sudo apt install python3-numpy
+
+$ cd /home/bghi639/ # or any other preferred directory
+$ git clone -b release https://gitlab.com/petsc/petsc.git petsc
+$ cd petsc/
+$ git checkout v3.24.1 # or latest stable version (check https://petsc.org/release/install/)
+$ ./configure --prefix=$HOME/petsc-install --with-debugging=0 --with-shared-libraries=1 --download-mpich=0 --download-fblaslapack --download-hdf5 --download-metis --download-parmetis --download-scalapack --download-mumps --download-hypre --with-openmp=1 --with-fortran-bindings=0
+# --prefix : install location, can not be the same as $HOME/petsc (source location, PETSC_DIR)
+# --prefix=$HOME/petsc-install : keep source in $HOME/petsc (PETSC_DIR) and install into $HOME/petsc-install (or any other path)
+# --download-mpich=0 : Ubuntu 24.04 provides openmpi and mpich via apt -- > use system versions for better integration
+# --with-fortran-bindings=0 : skip all Fortran interface generation to reduce the build times
+$ make all check
+$ make PETSC_DIR=/home/bghi639/petsc PETSC_ARCH=arch-linux-c-opt install
+$ make install
+# To verify correct installation and check if the libraries are working, do (in current directory):
+$ make PETSC_DIR=/home/bghi639/petsc-install PETSC_ARCH="" check
+
+### See examples of Makefile and bash script for compiling and executing a C++ program
+
+### Configuration output:
+Compilers:
+  C Compiler:  mpicc  -fPIC -Wall -Wwrite-strings -Wno-unknown-pragmas -Wno-lto-type-mismatch -Wno-stringop-overflow -fstack-protector -fvisibility=hidden -g -O  -fopenmp
+    Version: gcc (Ubuntu 13.3.0-6ubuntu2~24.04) 13.3.0
+  C++ Compiler:  mpicxx  -Wall -Wwrite-strings -Wno-strict-aliasing -Wno-unknown-pragmas -Wno-lto-type-mismatch -Wno-psabi -fstack-protector -fvisibility=hidden -g -O  -std=gnu++20 -fPIC  -fopenmp
+    Version: g++ (Ubuntu 13.3.0-6ubuntu2~24.04) 13.3.0
+  Fortran Compiler:  mpif90  -fPIC -Wall -ffree-line-length-none -ffree-line-length-0 -Wno-lto-type-mismatch -Wno-unused-dummy-argument -g -O   -fopenmp
+    Version: GNU Fortran (Ubuntu 13.3.0-6ubuntu2~24.04) 13.3.0
+Linkers:
+  Shared linker:   mpicc  -fopenmp -shared  -fPIC -Wall -Wwrite-strings -Wno-unknown-pragmas -Wno-lto-type-mismatch -Wno-stringop-overflow -fstack-protector -fvisibility=hidden -g -O
+  Dynamic linker:   mpicc  -fopenmp -shared  -fPIC -Wall -Wwrite-strings -Wno-unknown-pragmas -Wno-lto-type-mismatch -Wno-stringop-overflow -fstack-protector -fvisibility=hidden -g -O
+  Libraries linked against:   -lquadmath 
+Intel instruction sets found on CPU:
+  AVX2
+Python:
+  Executable: /usr/bin/python3
+BlasLapack:
+  Libraries:  -Wl,-rpath,/home/bghi639/petsc-install/lib -L/home/bghi639/petsc-install/lib -lflapack -lfblas
+  uses 4 byte integers
+MPI:
+  Version:    3
+  mpiexec: /usr/bin/mpiexec
+  Implementation: openmpi
+  OMPI_VERSION: 4.1.6
+X:
+  Libraries:  -lX11
+OpenMP:
+  Version:    201511
+pthread:
+CMake:
+  Version:    3.28.3
+  Executable: /usr/bin/cmake
+fblaslapack:
+HDF5:
+  Version:    1.14.6
+  Includes:   -I/home/bghi639/petsc-install/include
+  Libraries:  -Wl,-rpath,/home/bghi639/petsc-install/lib -L/home/bghi639/petsc-install/lib -lhdf5_hl -lhdf5
+hypre:
+  Version:    3.0.0
+  Includes:   -I/home/bghi639/petsc-install/include
+  Libraries:  -Wl,-rpath,/home/bghi639/petsc-install/lib -L/home/bghi639/petsc-install/lib -lHYPRE
+  uses OpenMP; use export OMP_NUM_THREADS=<p> or -omp_num_threads <p> to control the number of threads
+METIS:
+  Version:    5.1.0
+  Includes:   -I/home/bghi639/petsc-install/include
+  Libraries:  -Wl,-rpath,/home/bghi639/petsc-install/lib -L/home/bghi639/petsc-install/lib -lmetis
+ParMETIS:
+  Version:    4.0.3
+  Includes:   -I/home/bghi639/petsc-install/include
+  Libraries:  -Wl,-rpath,/home/bghi639/petsc-install/lib -L/home/bghi639/petsc-install/lib -lparmetis
+ScaLAPACK:
+  Libraries:  -Wl,-rpath,/home/bghi639/petsc-install/lib -L/home/bghi639/petsc-install/lib -lscalapack
+MUMPS:
+  Version:    5.8.1
+  Includes:   -I/home/bghi639/petsc-install/include
+  Libraries:  -Wl,-rpath,/home/bghi639/petsc-install/lib -L/home/bghi639/petsc-install/lib -ldmumps -lmumps_common -lpord -lpthread
+  uses OpenMP; use export OMP_NUM_THREADS=<p> or -omp_num_threads <p> to control the number of threads
+regex:
+PETSc:
+  Language used to compile PETSc: C
+  PETSC_ARCH: arch-linux-c-opt
+  PETSC_DIR: /home/bghi639/petsc
+  Prefix: /home/bghi639/petsc-install
+  Scalar type: real
+  Precision: double
+  Support for __float128
+  Integer size: 4 bytes
+  Single library: yes
+  Shared libraries: yes
+  Memory alignment from malloc(): 16 bytes
+  Using GNU make: /usr/bin/make
+xxx=======================================================================================xxx
+ Configure stage complete. Now build PETSc libraries with:
+   make PETSC_DIR=/home/bghi639/petsc PETSC_ARCH=arch-linux-c-opt all
+xxx=======================================================================================xxx
+
