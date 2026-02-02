@@ -1,9 +1,9 @@
 services:
-  tutorial-5:
+  abi-animus-lab-tutorials:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: tutorial-5
+    container_name: abi-animus-lab-tutorials
     ports:
       - "8888:8888"
     volumes:
