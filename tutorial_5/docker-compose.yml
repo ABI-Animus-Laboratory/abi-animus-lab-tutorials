@@ -1,14 +1,19 @@
 services:
-  opencor-tutorial:
+  tutorial-5:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: opencor-tutorial
+    container_name: tutorial-5
     ports:
       - "8888:8888"
     volumes:
       # Mount current directory to persist notebook changes
       - .:/tutorials
+      # X11 socket for GUI display (Linux/Mac with XQuartz)
+      # This will be empty/ignored on Windows
+      - /tmp/.X11-unix:/tmp/.X11-unix:rw
     environment:
       - JUPYTER_ENABLE_LAB=no
+      # Pass host DISPLAY for Linux, container script will auto-detect for Windows/Mac
+      - DISPLAY=${DISPLAY:-}
     restart: unless-stopped

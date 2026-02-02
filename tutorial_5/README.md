@@ -1,52 +1,72 @@
-# OpenCOR 0.8.3 Jupyter Tutorial
+# OpenCOR 0.8.3 + ImageJ/Fiji Tutorial
 
-A Docker-based tutorial environment for learning OpenCOR and CellML modeling.
+A Docker-based tutorial environment for learning OpenCOR CellML modeling with ImageJ/Fiji for image analysis.
 
 ## Quick Start
 
-### Option 1: Using Docker Compose (Recommended)
+### Linux
 
 ```bash
-# Build and start the container
-docker-compose up --build
+# Allow X11 connections from Docker
+xhost +local:docker
 
+# Build and start the container
+docker compose up --build -d
+
+# Access Jupyter at http://localhost:8888
+# ImageJ/Fiji GUI will launch automatically on your desktop
+```
+
+### Windows (with VcXsrv or X410)
+
+1. Install an X server (VcXsrv or X410)
+2. Start the X server with "Disable access control" checked
+3. Run:
+
+```powershell
+docker compose up --build -d
 # Access Jupyter at http://localhost:8888
 ```
 
-### Option 2: Using Docker directly
+### macOS (with XQuartz)
+
+1. Install XQuartz: `brew install --cask xquartz`
+2. Open XQuartz > Preferences > Security > Enable "Allow connections from network clients"
+3. Restart XQuartz, then run:
 
 ```bash
-# Build the image
-docker build -t opencor-tutorial .
-
-# Run the container
-docker run -p 8888:8888 -v $(pwd):/tutorials opencor-tutorial
-```
-
-### Option 3: Run in background
-
-```bash
-# Start in detached mode
-docker-compose up -d --build
-
-# View logs
-docker-compose logs -f
-
-# Stop the container
-docker-compose down
+xhost + 127.0.0.1
+docker compose up --build -d
+# Access Jupyter at http://localhost:8888
 ```
 
 ## Accessing the Tutorial
 
-Once the container is running, open your browser and navigate to:
+Once the container is running:
+- **Jupyter Notebook**: http://localhost:8888
+- **ImageJ/Fiji**: GUI launches automatically (requires X11 setup)
 
-**http://localhost:8888**
+Open `opencor_tutorial.ipynb` to begin the tutorial.
 
-Then open `opencor_tutorial.ipynb` to begin the tutorial.
+## Container Management
+
+```bash
+docker compose logs -f    # View logs
+docker compose down       # Stop container
+docker compose up --build # Rebuild after changes
+```
+
+### Restart Fiji (if accidentally closed)
+
+```bash
+docker exec -it opencor-tutorial /opt/fiji/fiji-linux-x64 &
+```
 
 ## What's Included
 
 - **OpenCOR 0.8.3** - Pre-installed at `/opt/OpenCOR`
+- **ImageJ/Fiji (Latest)** - Pre-installed at `/opt/fiji`
+- **Java 21 Runtime** - Bundled with Fiji
 - **Python 3.12** - OpenCOR's bundled Python
 - **Pre-installed Libraries:**
   - numpy, pandas, scipy, matplotlib, seaborn
@@ -56,30 +76,27 @@ Then open `opencor_tutorial.ipynb` to begin the tutorial.
   - mpi4py, schwimmbad
   - rdflib, tqdm
 
-## Technical Notes
-
-- The container uses OpenCOR's bundled Python (`/opt/OpenCOR/run_python`)
-- Jupyter is launched via `/opt/OpenCOR/jupyternotebook`
-- All notebooks are saved to the mounted volume for persistence
-
 ## Troubleshooting
 
-### Port already in use
+### ImageJ GUI not displaying
+
+The container auto-detects your display configuration. If ImageJ doesn't appear:
+
+**Linux:**
 ```bash
-# Use a different port
-docker run -p 9999:8888 -v $(pwd):/tutorials opencor-tutorial
-# Then access at http://localhost:9999
+xhost +local:docker
 ```
+
+**Windows:**
+- Ensure VcXsrv/X410 is running with "Disable access control" enabled
+- Check firewall allows connections on port 6000
+
+**macOS:**
+- Ensure XQuartz is properly configured and restarted
+- Run `xhost + 127.0.0.1` before starting the container
 
 ### Permission issues on Linux
 ```bash
-# Add your user to docker group
 sudo usermod -aG docker $USER
 # Log out and back in
-```
-
-### Rebuild after changes
-```bash
-docker-compose down
-docker-compose up --build
 ```
