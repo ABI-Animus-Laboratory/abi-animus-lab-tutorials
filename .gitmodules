@@ -2,3 +2,7 @@
 	path = tutorial_5/circulatory_autogen
 	url = https://github.com/FinbarArgus/circulatory_autogen.git
 	branch = devel_interactive_tutorial
+[submodule "tutorial_4/MicrovascularModelling"]
+	path = tutorial_4/MicrovascularModelling
+	url = https://github.com/Cameron-Apeldoorn/MicrovascularModelling.git
+	branch = min_lab_use
