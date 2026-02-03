@@ -167,6 +167,12 @@ RUN mkdir -p /opt/vita/bin && echo '#!/bin/bash\n\
 # Add VItA bin to PATH
 ENV PATH="/opt/vita/bin:${PATH}"
 
+WORKDIR /tutorials/tutorial_Alireza
+RUN git clone -b min_lab_use https://github.com/Cameron-Apeldoorn/MicrovascularModelling.git
+
+WORKDIR /tutorials/tutorial_5
+RUN git clone -b devel_interactive_tutorial https://github.com/FinbarArgus/circulatory_autogen.git
+
 # Download and install OpenCOR 0.8.3
 WORKDIR /tmp
 RUN wget -q https://github.com/opencor/opencor/releases/download/v0.8.3/OpenCOR-0-8-3-Linux.tar.gz \
