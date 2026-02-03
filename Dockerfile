@@ -126,6 +126,12 @@ RUN git clone --depth 1 https://github.com/GonzaloMaso/VItA.git vita_source \
 ENV VITA_PATH=/opt/vita
 ENV LD_LIBRARY_PATH="${VITA_PATH}/vita_build/lib:${VITA_PATH}/lib:${LD_LIBRARY_PATH}"
 
+# VItA and VTK specific include/lib vars (moved from docker-compose)
+ENV VTK_INCLUDE_DIRS=${VITA_PATH}/vita_build/include/vtk-8.1
+ENV VITA_INCLUDE_DIRS=${VITA_PATH}/include/vita_source
+ENV VTK_LIBRARY_DIRS=${VITA_PATH}/vita_build/lib
+ENV VITA_LIBRARY_DIRS=${VITA_PATH}/lib
+
 # Create VItA example compilation helper script
 RUN mkdir -p /opt/vita/bin && echo '#!/bin/bash\n\
     # VItA Example Compiler and Runner\n\
