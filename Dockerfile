@@ -53,6 +53,16 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libfontconfig1 \
     fonts-liberation \
     xdg-utils \
+    # VItA build dependencies
+    git \
+    g++ \
+    make \
+    cmake \
+    libgl1-mesa-dev \
+    freeglut3-dev \
+    libglew-dev \
+    libglm-dev \
+    libfreetype6-dev \
     && rm -rf /var/lib/apt/lists/*
 
 # Install Python 3.9.18 as an additional kernel
@@ -78,7 +88,7 @@ RUN conda tos accept --override-channels --channel https://repo.anaconda.com/pkg
     && conda tos accept --override-channels --channel https://repo.anaconda.com/pkgs/r || true
 
 # Create the conda environment from file
-COPY tutorial_4/environment.yml /tmp/environment.yml
+COPY tutorial_Alireza/environment.yml /tmp/environment.yml
 # Install mamba for faster and better dependency resolution
 # Remove expat/libexpat version pins which conflict with vtk (vtk needs libexpat <2.6.0 but env specifies 2.6.1)
 # The solver will automatically install compatible expat versions as transitive dependencies
@@ -95,6 +105,70 @@ RUN /opt/conda/envs/femSolver/bin/pip install ipykernel \
 
 # Verify key packages are installed in the femSolver environment
 RUN /opt/conda/envs/femSolver/bin/python -c "import numpy; print(f'numpy: {numpy.__version__}'); import scipy; print(f'scipy: {scipy.__version__}'); import pyvista; print(f'pyvista: {pyvista.__version__}'); import vtk; print(f'vtk: {vtk.vtkVersion.GetVTKVersion()}'); print('All key packages verified!')"
+
+# Build VItA library (Virtual ITerative Angiogenesis) with VTK 8.1
+# This generates synthetic vasculature networks as .vtp files
+# Note: VTK 8.1 is built from source (~30+ min on first build)
+WORKDIR /opt/vita
+RUN git clone --depth 1 https://github.com/GonzaloMaso/VItA.git source \
+    && mkdir build \
+    # Fix bug in VItA's dependencies.cmake: -j32 is a make flag, not cmake
+    && sed -i 's/-j32//g' source/dependencies.cmake \
+    && cd build \
+    && cmake ../source \
+    -DCMAKE_INSTALL_PREFIX=/opt/vita \
+    -DDOWNLOAD_DEPENDENCIES=ON \
+    -DCMAKE_BUILD_TYPE=Release \
+    && make -j$(nproc) \
+    && make install
+
+# Set VItA environment variables
+ENV VITA_PATH=/opt/vita
+ENV LD_LIBRARY_PATH="${VITA_PATH}/build/lib:${VITA_PATH}/lib:${LD_LIBRARY_PATH}"
+
+# Create VItA example compilation helper script
+RUN mkdir -p /opt/vita/bin && echo '#!/bin/bash\n\
+    # VItA Example Compiler and Runner\n\
+    # Usage: run_vita_example <example.cpp> [output_dir]\n\
+    \n\
+    EXAMPLE=$1\n\
+    OUTPUT_DIR=${2:-$(pwd)}\n\
+    \n\
+    if [ -z "$EXAMPLE" ]; then\n\
+    echo "Usage: run_vita_example <example.cpp> [output_dir]"\n\
+    exit 1\n\
+    fi\n\
+    \n\
+    g++ "$EXAMPLE" -Wall -std=c++11 -O3 \\\n\
+    -I/opt/vita/build/include/vtk-8.1 \\\n\
+    -I/opt/vita/include/vita_source \\\n\
+    -L/opt/vita/build/lib \\\n\
+    -L/opt/vita/lib \\\n\
+    -o /tmp/vita_example \\\n\
+    -lVItA \\\n\
+    -lvtkCommonCore-8.1 \\\n\
+    -lvtkCommonDataModel-8.1 \\\n\
+    -lvtkCommonExecutionModel-8.1 \\\n\
+    -lvtkFiltersModeling-8.1 \\\n\
+    -lvtkIOCore-8.1 \\\n\
+    -lvtkIOLegacy-8.1 \\\n\
+    -lvtkIOXML-8.1 \\\n\
+    -lvtkIOGeometry-8.1 \\\n\
+    -lvtkInfovisCore-8.1 \\\n\
+    -lvtkFiltersGeneral-8.1 \\\n\
+    -lvtkFiltersCore-8.1 \\\n\
+    -lvtkCommonTransforms-8.1 \\\n\
+    -lvtkIOXMLParser-8.1\n\
+    \n\
+    cd "$OUTPUT_DIR"\n\
+    /tmp/vita_example\n\
+    ' > /opt/vita/bin/run_vita_example && chmod +x /opt/vita/bin/run_vita_example
+
+# Add VItA bin to PATH
+ENV PATH="/opt/vita/bin:${PATH}"
+
+WORKDIR /tutorials/tutorial_Alireza
+RUN git clone -b min_lab_use https://github.com/Cameron-Apeldoorn/MicrovascularModelling.git
 
 # Download and install OpenCOR 0.8.3
 WORKDIR /tmp
