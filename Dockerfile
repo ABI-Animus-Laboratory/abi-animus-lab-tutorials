@@ -141,7 +141,7 @@ RUN mkdir -p /opt/vita/bin && echo '#!/bin/bash\n\
     \n\
     g++ "$EXAMPLE" -Wall -std=c++11 -O3 \\\n\
     -I/opt/vita/build/include/vtk-8.1 \\\n\
-    -I/opt/vita/include/vita_source \\\n\
+    -I/opt/vita/include/source \\\n\
     -L/opt/vita/build/lib \\\n\
     -L/opt/vita/lib \\\n\
     -o /tmp/vita_example \\\n\
