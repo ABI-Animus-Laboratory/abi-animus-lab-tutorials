@@ -173,12 +173,6 @@ RUN mkdir -p /opt/vita/bin && echo '#!/bin/bash\n\
 # Add VItA bin to PATH
 ENV PATH="/opt/vita/bin:${PATH}"
 
-WORKDIR /tutorials/tutorial_Alireza
-RUN git clone -b min_lab_use https://github.com/Cameron-Apeldoorn/MicrovascularModelling.git
-
-WORKDIR /tutorials/tutorial_5
-RUN git clone -b devel_interactive_tutorial https://github.com/FinbarArgus/circulatory_autogen.git
-
 # Download and install OpenCOR 0.8.3
 WORKDIR /tmp
 RUN wget -q https://github.com/opencor/opencor/releases/download/v0.8.3/OpenCOR-0-8-3-Linux.tar.gz \
@@ -208,11 +202,19 @@ RUN sed -i 's|"OpenCOR"|"/opt/OpenCOR/bin/OpenCOR"|g' /opt/OpenCOR/Python/share/
 WORKDIR /tutorials
 COPY . /tutorials/
 
+WORKDIR /tutorials/tutorial_Alireza
+RUN git clone -b min_lab_use https://github.com/Cameron-Apeldoorn/MicrovascularModelling.git
+
+WORKDIR /tutorials/tutorial_5
+RUN git clone -b devel_interactive_tutorial https://github.com/FinbarArgus/circulatory_autogen.git
+
+WORKDIR /tutorials
+
 # Expose Jupyter port
 EXPOSE 8888
 
 # Create startup script using OpenCOR's jupyter wrapper with proper libs
-# Also launches ImageJ/Fiji in background for GUI access
+# ImageJ/Fiji can be launched manually for GUI access
 # Auto-detects DISPLAY for cross-platform support (Linux, Windows, Mac)
 RUN echo '#!/bin/bash\n\
     export LD_LIBRARY_PATH="/opt/OpenCOR/lib:${LD_LIBRARY_PATH}"\n\
@@ -232,14 +234,6 @@ RUN echo '#!/bin/bash\n\
     fi\n\
     fi\n\
     \n\
-    # Launch ImageJ/Fiji in background if DISPLAY is available\n\
-    if [ -n "$DISPLAY" ]; then\n\
-    echo "Starting ImageJ/Fiji with DISPLAY=$DISPLAY"\n\
-    /opt/fiji/fiji-linux-x64 &\n\
-    else\n\
-    echo "No DISPLAY available - ImageJ GUI disabled"\n\
-    echo "To enable GUI, set up X11 forwarding (see README.md)"\n\
-    fi\n\
     \n\
     cd /tutorials\n\
     /opt/OpenCOR/Python/bin/jupyter notebook \\\n\
@@ -253,5 +247,5 @@ RUN echo '#!/bin/bash\n\
     > /opt/OpenCOR/start_jupyter.sh \
     && chmod +x /opt/OpenCOR/start_jupyter.sh
 
-# Default command: Start Jupyter Notebook and ImageJ
+# Default command: Start Jupyter Notebook
 CMD ["/opt/OpenCOR/start_jupyter.sh"]
