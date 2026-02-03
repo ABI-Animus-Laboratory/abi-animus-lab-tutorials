@@ -1,0 +1,8 @@
+[submodule "tutorial_Alireza/MicrovascularModelling"]
+	path = tutorial_Alireza/MicrovascularModelling
+	url = https://github.com/Cameron-Apeldoorn/MicrovascularModelling.git
+	branch = min_lab_use
+[submodule "tutorial_5/circulatory_autogen"]
+	path = tutorial_5/circulatory_autogen
+	url = https://github.com/FinbarArgus/circulatory_autogen.git
+	branch = devel_interactive_tutorial
