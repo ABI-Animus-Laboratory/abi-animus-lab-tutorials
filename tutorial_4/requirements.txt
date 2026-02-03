@@ -1,0 +1,5 @@
+scipy
+pandas==2.3.3
+neurokit2
+easygui
+matplotlib
