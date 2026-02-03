@@ -16,4 +16,8 @@ services:
       - JUPYTER_ENABLE_LAB=no
       # Pass host DISPLAY for Linux, container script will auto-detect for Windows/Mac
       - DISPLAY=${DISPLAY:-}
+      - VTK_INCLUDE_DIRS=/opt/vita/vita_build/include/vtk-8.1
+      - VITA_INCLUDE_DIRS=/opt/vita/include/vita_source
+      - VTK_LIBRARY_DIRS=/opt/vita/vita_build/lib
+      - VITA_LIBRARY_DIRS=/opt/vita/lib
     restart: unless-stopped
