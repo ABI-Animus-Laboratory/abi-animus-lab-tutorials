@@ -110,12 +110,12 @@ RUN /opt/conda/envs/femSolver/bin/python -c "import numpy; print(f'numpy: {numpy
 # This generates synthetic vasculature networks as .vtp files
 # Note: VTK 8.1 is built from source (~30+ min on first build)
 WORKDIR /opt/vita
-RUN git clone --depth 1 https://github.com/GonzaloMaso/VItA.git source \
-    && mkdir build \
+RUN git clone --depth 1 https://github.com/GonzaloMaso/VItA.git vita_source \
+    && mkdir vita_build \
     # Fix bug in VItA's dependencies.cmake: -j32 is a make flag, not cmake
-    && sed -i 's/-j32//g' source/dependencies.cmake \
-    && cd build \
-    && cmake ../source \
+    && sed -i 's/-j32//g' vita_source/dependencies.cmake \
+    && cd vita_build \
+    && cmake ../vita_source \
     -DCMAKE_INSTALL_PREFIX=/opt/vita \
     -DDOWNLOAD_DEPENDENCIES=ON \
     -DCMAKE_BUILD_TYPE=Release \
@@ -124,7 +124,7 @@ RUN git clone --depth 1 https://github.com/GonzaloMaso/VItA.git source \
 
 # Set VItA environment variables
 ENV VITA_PATH=/opt/vita
-ENV LD_LIBRARY_PATH="${VITA_PATH}/build/lib:${VITA_PATH}/lib:${LD_LIBRARY_PATH}"
+ENV LD_LIBRARY_PATH="${VITA_PATH}/vita_build/lib:${VITA_PATH}/lib:${LD_LIBRARY_PATH}"
 
 # Create VItA example compilation helper script
 RUN mkdir -p /opt/vita/bin && echo '#!/bin/bash\n\
@@ -140,9 +140,9 @@ RUN mkdir -p /opt/vita/bin && echo '#!/bin/bash\n\
     fi\n\
     \n\
     g++ "$EXAMPLE" -Wall -std=c++11 -O3 \\\n\
-    -I/opt/vita/build/include/vtk-8.1 \\\n\
-    -I/opt/vita/include/source \\\n\
-    -L/opt/vita/build/lib \\\n\
+    -I/opt/vita/vita_build/include/vtk-8.1 \\\n\
+    -I/opt/vita/include/vita_source \\\n\
+    -L/opt/vita/vita_build/lib \\\n\
     -L/opt/vita/lib \\\n\
     -o /tmp/vita_example \\\n\
     -lVItA \\\n\
