@@ -17,6 +17,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     curl \
     ca-certificates \
     unzip \
+    software-properties-common \
     # Java runtime for ImageJ/Fiji
     openjdk-8-jre \
     # X11 libraries for ImageJ GUI
@@ -53,6 +54,47 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     fonts-liberation \
     xdg-utils \
     && rm -rf /var/lib/apt/lists/*
+
+# Install Python 3.9.18 as an additional kernel
+RUN add-apt-repository -y ppa:deadsnakes/ppa \
+    && apt-get update \
+    && apt-get install -y python3.9 python3.9-distutils python3.9-dev \
+    && curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py \
+    && python3.9 get-pip.py \
+    && python3.9 -m pip install ipykernel \
+    && python3.9 -m ipykernel install --name python3.9 --display-name "Python 3.9" \
+    && rm get-pip.py
+
+# Install Miniconda and configure the environment
+ENV CONDA_DIR=/opt/conda
+ENV PATH=$CONDA_DIR/bin:$PATH
+
+RUN wget -q https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh -O /tmp/miniconda.sh \
+    && bash /tmp/miniconda.sh -b -p $CONDA_DIR \
+    && rm /tmp/miniconda.sh
+
+# Accept Conda Terms of Service (required for defaults channel)
+RUN conda tos accept --override-channels --channel https://repo.anaconda.com/pkgs/main \
+    && conda tos accept --override-channels --channel https://repo.anaconda.com/pkgs/r || true
+
+# Create the conda environment from file
+COPY tutorial_4/environment.yml /tmp/environment.yml
+# Install mamba for faster and better dependency resolution
+# Remove expat/libexpat version pins which conflict with vtk (vtk needs libexpat <2.6.0 but env specifies 2.6.1)
+# The solver will automatically install compatible expat versions as transitive dependencies
+RUN conda install -n base -c conda-forge mamba -y \
+    && sed -i '/^  - expat=/d' /tmp/environment.yml \
+    && sed -i '/^  - libexpat=/d' /tmp/environment.yml \
+    && mamba env create -f /tmp/environment.yml \
+    && conda clean -ya
+
+# Register the conda environment as a Jupyter kernel
+# We install ipykernel explicitly in the environment to ensure it's available
+RUN /opt/conda/envs/femSolver/bin/pip install ipykernel \
+    && /opt/conda/envs/femSolver/bin/python -m ipykernel install --name femSolver --display-name "Python (femSolver)"
+
+# Verify key packages are installed in the femSolver environment
+RUN /opt/conda/envs/femSolver/bin/python -c "import numpy; print(f'numpy: {numpy.__version__}'); import scipy; print(f'scipy: {scipy.__version__}'); import pyvista; print(f'pyvista: {pyvista.__version__}'); import vtk; print(f'vtk: {vtk.vtkVersion.GetVTKVersion()}'); print('All key packages verified!')"
 
 # Download and install OpenCOR 0.8.3
 WORKDIR /tmp
