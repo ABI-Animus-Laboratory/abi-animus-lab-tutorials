@@ -1,0 +1,22 @@
+services:
+  abi-animus-lab-tutorials:
+    # Pull the image from GitHub Container Registry
+    # Ensure the image name matches your repository (lowercase)
+    image: ghcr.io/abi-animus-laboratory/abi-animus-lab-tutorials:latest
+    container_name: abi-animus-lab-tutorials
+    ports:
+      - "8888:8888"
+    volumes:
+      # Mount current directory to persist notebook changes
+      # NOTE: If you are running this without the source code, you might want to remove this line
+      # or use a named volume to avoid hiding the built-in tutorials.
+      - .:/tutorials
+      # X11 socket for GUI display (Linux/Mac with XQuartz)
+      # This will be empty/ignored on Windows
+      - /tmp/.X11-unix:/tmp/.X11-unix:rw
+    environment:
+      - JUPYTER_ENABLE_LAB=no
+      # Pass host DISPLAY for Linux, container script will auto-detect for Windows/Mac
+      - DISPLAY=${DISPLAY:-}
+
+    restart: unless-stopped
