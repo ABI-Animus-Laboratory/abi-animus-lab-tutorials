@@ -151,8 +151,16 @@ RUN wget -q https://downloads.imagej.net/fiji/latest/fiji-latest-linux64-jdk.zip
     && chmod +x /opt/fiji/fiji-linux-x64 \
     && rm fiji-latest-linux64-jdk.zip
 
+# Download and install Ilastik 1.4.1.post1
+RUN wget -q https://files.ilastik.org/ilastik-1.4.1.post1-Linux.tar.bz2 \
+    && tar -xjf ilastik-1.4.1.post1-Linux.tar.bz2 -C /opt \
+    && mv /opt/ilastik-1.4.1.post1-Linux /opt/ilastik \
+    && rm ilastik-1.4.1.post1-Linux.tar.bz2 \
+    && chmod +x /opt/ilastik/run_ilastik.sh \
+    && ln -s /opt/ilastik/run_ilastik.sh /usr/local/bin/ilastik
+
 # Add OpenCOR and Fiji to PATH and set library path
-ENV PATH="/opt/OpenCOR/bin:/opt/OpenCOR:/opt/fiji:${PATH}"
+ENV PATH="/opt/OpenCOR/bin:/opt/OpenCOR:/opt/fiji:/opt/ilastik:${PATH}"
 ENV LD_LIBRARY_PATH="/opt/OpenCOR/lib:${LD_LIBRARY_PATH}"
 
 # Install Python dependencies using OpenCOR's pip
@@ -183,7 +191,7 @@ EXPOSE 8888
 # Auto-detects DISPLAY for cross-platform support (Linux, Windows, Mac)
 RUN echo '#!/bin/bash\n\
     export LD_LIBRARY_PATH="/opt/OpenCOR/lib:${LD_LIBRARY_PATH}"\n\
-    export PATH="/opt/OpenCOR/bin:/opt/OpenCOR:/opt/fiji:${PATH}"\n\
+    export PATH="/opt/OpenCOR/bin:/opt/OpenCOR:/opt/fiji:/opt/ilastik:${PATH}"\n\
     export JUPYTER_CONFIG_DIR=/tmp/jupyter_config\n\
     mkdir -p $JUPYTER_CONFIG_DIR\n\
     \n\
