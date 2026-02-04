@@ -114,6 +114,8 @@ RUN git clone --depth 1 https://github.com/GonzaloMaso/VItA.git vita_source \
     && mkdir vita_build \
     # Fix bug in VItA's dependencies.cmake: -j32 is a make flag, not cmake
     && sed -i 's/-j32//g' vita_source/dependencies.cmake \
+    # Fix missing symbols in VTK by forcing default visibility
+    && sed -i 's/CMAKE_POSITION_INDEPENDENT_CODE=YES/CMAKE_POSITION_INDEPENDENT_CODE=YES -DCMAKE_CXX_VISIBILITY_PRESET=default/g' vita_source/dependencies.cmake \
     && cd vita_build \
     && cmake ../vita_source \
     -DCMAKE_INSTALL_PREFIX=/opt/vita \
