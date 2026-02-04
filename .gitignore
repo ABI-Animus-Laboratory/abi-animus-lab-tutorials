@@ -42,3 +42,7 @@ venv.bak/
 # OS
 .DS_Store
 Thumbs.db
+
+#cmake
+CMakeFiles/
+vita_build_cache/
