@@ -5,8 +5,8 @@ CXX = g++
 CXXFLAGS = -Wall -O2 -std=c++17 $(INC_DIR)
 
 # SUNDIALS paths from Spack
-# SUNDIALS_PREFIX := $(shell spack location -i sundials)
-SUNDIALS_PREFIX := $(shell spack location -i sundials~mpi)
+SUNDIALS_PREFIX := $(shell spack location -i sundials)
+# SUNDIALS_PREFIX := $(shell spack location -i sundials~mpi)
 INC_DIR = -I$(SUNDIALS_PREFIX)/include
 LIB_DIR = -L$(SUNDIALS_PREFIX)/lib
 
@@ -21,7 +21,7 @@ LDLIBS = -lsundials_cvodes \
          -lm
 
 # Source files
-SRCS = main0d.cpp model0d.cc
+SRCS = main0d.cpp #model0d.cc
 # Object files (auto-generated from SRCS)
 OBJS := $(SRCS:.cpp=.o) # OBJS = $(SRCS:.cpp=.o)
 OBJS := $(OBJS:.cc=.o)
