@@ -130,6 +130,8 @@ RUN git clone -b release https://gitlab.com/petsc/petsc.git ${PETSC_DIR} \
     # Clean up source to save space if desired (optional, but good for layer size)
     && rm -rf ${PETSC_DIR}/src ${PETSC_DIR}/docs
 
+COPY . /tutorials/
+
 # Install Python 3.9.18 as an additional kernel
 RUN add-apt-repository -y ppa:deadsnakes/ppa \
     && apt-get update \
@@ -152,64 +154,71 @@ RUN wget -q https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.s
 RUN conda tos accept --override-channels --channel https://repo.anaconda.com/pkgs/main \
     && conda tos accept --override-channels --channel https://repo.anaconda.com/pkgs/r || true
 
-# # Create the conda environment from file
-# COPY tutorial_Alireza/environment.yml /tmp/environment.yml
-# # Install mamba for faster and better dependency resolution
-# # Remove expat/libexpat version pins which conflict with vtk (vtk needs libexpat <2.6.0 but env specifies 2.6.1)
-# # The solver will automatically install compatible expat versions as transitive dependencies
-# RUN conda install -n base -c conda-forge mamba -y \
-#     && sed -i '/^  - expat=/d' /tmp/environment.yml \
-#     && sed -i '/^  - libexpat=/d' /tmp/environment.yml \
-#     && mamba env create -f /tmp/environment.yml \
-#     && conda clean -ya
+# Create the conda environment for tutorial_4
+# Create environment with Python 3.12.2 and install dependencies
+RUN conda create -n tutorial_4 python=3.12.2 -y \
+    && conda run -n tutorial_4 pip install --no-cache-dir -r /tutorials/tutorial_4/requirements.txt \
+    && conda run -n tutorial_4 pip install ipykernel \
+    && conda run -n tutorial_4 python -m ipykernel install --name tutorial_4 --display-name "Python (Tutorial 4)" \
+    && conda clean -ya
 
-# # Register the conda environment as a Jupyter kernel
-# # We install ipykernel explicitly in the environment to ensure it's available
-# RUN /opt/conda/envs/femSolver/bin/pip install ipykernel \
-#     && /opt/conda/envs/femSolver/bin/python -m ipykernel install --name femSolver --display-name "Python (femSolver)"
+# Create the conda environment from file
+# Install mamba for faster and better dependency resolution
+# Remove expat/libexpat version pins which conflict with vtk (vtk needs libexpat <2.6.0 but env specifies 2.6.1)
+# The solver will automatically install compatible expat versions as transitive dependencies
+RUN conda install -n base -c conda-forge mamba -y \
+    && sed -i '/^  - expat=/d' /tutorials/tutorial_Alireza/environment.yml \
+    && sed -i '/^  - libexpat=/d' /tutorials/tutorial_Alireza/environment.yml \
+    && mamba env create -f /tutorials/tutorial_Alireza/environment.yml \
+    && conda clean -ya
 
-# # Verify key packages are installed in the femSolver environment
-# RUN /opt/conda/envs/femSolver/bin/python -c "import numpy; print(f'numpy: {numpy.__version__}'); import scipy; print(f'scipy: {scipy.__version__}'); import pyvista; print(f'pyvista: {pyvista.__version__}'); import vtk; print(f'vtk: {vtk.vtkVersion.GetVTKVersion()}'); print('All key packages verified!')"
+# Register the conda environment as a Jupyter kernel
+# We install ipykernel explicitly in the environment to ensure it's available
+RUN /opt/conda/envs/femSolver/bin/pip install ipykernel \
+    && /opt/conda/envs/femSolver/bin/python -m ipykernel install --name femSolver --display-name "Python (femSolver)"
 
-# # Build VItA library (Virtual ITerative Angiogenesis) with VTK 8.1
-# # This generates synthetic vasculature networks as .vtp files
-# # Note: VTK 8.1 is built from source (~30+ min on first build)
-# WORKDIR /opt/vita
-# RUN git clone --depth 1 https://github.com/GonzaloMaso/VItA.git vita_source \
-#     && mkdir vita_build \
-#     # Fix bug in VItA's dependencies.cmake: -j32 is a make flag, not cmake
-#     && sed -i 's/-j32//g' vita_source/dependencies.cmake \
-#     # Fix missing symbols in VTK by forcing default visibility
-#     && sed -i 's/CMAKE_POSITION_INDEPENDENT_CODE=YES/CMAKE_POSITION_INDEPENDENT_CODE=YES -DCMAKE_CXX_VISIBILITY_PRESET=default/g' vita_source/dependencies.cmake \
-#     && cd vita_build \
-#     && cmake ../vita_source \
-#     -DCMAKE_INSTALL_PREFIX=/opt/vita \
-#     -DDOWNLOAD_DEPENDENCIES=ON \
-#     -DCMAKE_BUILD_TYPE=Release \
-#     && make -j$(nproc) \
-#     && make install
+# Verify key packages are installed in the femSolver environment
+RUN /opt/conda/envs/femSolver/bin/python -c "import numpy; print(f'numpy: {numpy.__version__}'); import scipy; print(f'scipy: {scipy.__version__}'); import pyvista; print(f'pyvista: {pyvista.__version__}'); import vtk; print(f'vtk: {vtk.vtkVersion.GetVTKVersion()}'); print('All key packages verified!')"
 
-# # Set VItA environment variables
-# ENV VITA_PATH=/opt/vita
-# ENV LD_LIBRARY_PATH="${VITA_PATH}/vita_build/lib:${VITA_PATH}/lib:${LD_LIBRARY_PATH}"
+# Build VItA library (Virtual ITerative Angiogenesis) with VTK 8.1
+# This generates synthetic vasculature networks as .vtp files
+# Note: VTK 8.1 is built from source (~30+ min on first build)
+WORKDIR /opt/vita
+RUN git clone --depth 1 https://github.com/GonzaloMaso/VItA.git vita_source \
+    && mkdir vita_build \
+    # Fix bug in VItA's dependencies.cmake: -j32 is a make flag, not cmake
+    && sed -i 's/-j32//g' vita_source/dependencies.cmake \
+    # Fix missing symbols in VTK by forcing default visibility
+    && sed -i 's/CMAKE_POSITION_INDEPENDENT_CODE=YES/CMAKE_POSITION_INDEPENDENT_CODE=YES -DCMAKE_CXX_VISIBILITY_PRESET=default/g' vita_source/dependencies.cmake \
+    && cd vita_build \
+    && cmake ../vita_source \
+    -DCMAKE_INSTALL_PREFIX=/opt/vita \
+    -DDOWNLOAD_DEPENDENCIES=ON \
+    -DCMAKE_BUILD_TYPE=Release \
+    && make -j$(nproc) \
+    && make install
 
-# # VItA and VTK specific include/lib vars (moved from docker-compose)
-# ENV VTK_INCLUDE_DIRS=${VITA_PATH}/vita_build/include/vtk-8.1
-# ENV VITA_INCLUDE_DIRS=${VITA_PATH}/include/vita_source
-# ENV VTK_LIBRARY_DIRS=${VITA_PATH}/vita_build/lib
-# ENV VITA_LIBRARY_DIRS=${VITA_PATH}/lib
+# Set VItA environment variables
+ENV VITA_PATH=/opt/vita
+ENV LD_LIBRARY_PATH="${VITA_PATH}/vita_build/lib:${VITA_PATH}/lib:${LD_LIBRARY_PATH}"
 
-# # Add VItA bin to PATH
-# ENV PATH="/opt/vita/bin:${PATH}"
+# VItA and VTK specific include/lib vars (moved from docker-compose)
+ENV VTK_INCLUDE_DIRS=${VITA_PATH}/vita_build/include/vtk-8.1
+ENV VITA_INCLUDE_DIRS=${VITA_PATH}/include/vita_source
+ENV VTK_LIBRARY_DIRS=${VITA_PATH}/vita_build/lib
+ENV VITA_LIBRARY_DIRS=${VITA_PATH}/lib
 
-# # Build example_1 from tutorial_Alireza
-# # Clean up any host build artifacts and build fresh
-# WORKDIR /tutorials/tutorial_Alireza/example_1
-# RUN rm -rf build CMakeCache.txt CMakeFiles \
-#     && mkdir build \
-#     && cd build \
-#     && cmake .. \
-#     && make
+# Add VItA bin to PATH
+ENV PATH="/opt/vita/bin:${PATH}"
+
+# Build example_1 from tutorial_Alireza
+# Clean up any host build artifacts and build fresh
+WORKDIR /tutorials/tutorial_Alireza/example_1
+RUN rm -rf build CMakeCache.txt CMakeFiles \
+    && mkdir build \
+    && cd build \
+    && cmake .. \
+    && make
 
 # Download and install OpenCOR 0.8.3
 WORKDIR /tmp
@@ -238,15 +247,13 @@ ENV PATH="/opt/OpenCOR/bin:/opt/OpenCOR:/opt/fiji:/opt/ilastik:${PATH}"
 ENV LD_LIBRARY_PATH="/opt/OpenCOR/lib:${LD_LIBRARY_PATH}"
 
 # Install Python dependencies using OpenCOR's pip
-COPY requirements.txt /tmp/requirements.txt
-RUN /opt/OpenCOR/pip install --no-cache-dir -r /tmp/requirements.txt
+RUN /opt/OpenCOR/pip install --no-cache-dir -r /tutorials/tutorial_5/requirements.txt
 
 # Fix the OpenCOR kernel.json to use full path
 RUN sed -i 's|"OpenCOR"|"/opt/OpenCOR/bin/OpenCOR"|g' /opt/OpenCOR/Python/share/jupyter/kernels/OpenCOR/kernel.json
 
 # Create working directory for notebooks
 WORKDIR /tutorials
-COPY . /tutorials/
 
 # Expose Jupyter port
 EXPOSE 8888
