@@ -1,6 +1,8 @@
 # PETSc configuration
 # Adjust PETSC_DIR and PETSC_ARCH as needed
-PETSC_DIR=/home/bghi639/petsc-install #XXX THIS MUST BE CHANGED
+# PETSC_DIR=/home/bghi639/petsc-install #XXX THIS MUST BE CHANGED
+# Updated for Docker container environment
+PETSC_DIR=/opt/petsc-install
 PETSC_ARCH=
 # PETSC_ARCH=""
 # PETSC_ARCH = arch-linux-c-opt
