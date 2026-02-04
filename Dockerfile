@@ -63,14 +63,79 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libglew-dev \
     libglm-dev \
     libfreetype6-dev \
+    # PETSc and Spack dependencies
+    build-essential \
+    gfortran \
+    libopenmpi-dev \
+    openmpi-bin \
+    libblas-dev \
+    liblapack-dev \
+    libmpich-dev \
+    python3-pip \
+    python3-numpy \
+    bzip2 \
+    gzip \
+    lsb-release \
+    patch \
+    tar \
+    xz-utils \
+    zstd \
     && rm -rf /var/lib/apt/lists/*
+
+# -----------------------------------------------------------------------------
+# Install Spack and libraries (SUNDIALS, nlohmann-json)
+# -----------------------------------------------------------------------------
+ENV SPACK_ROOT=/opt/spack
+ENV PATH=${SPACK_ROOT}/bin:${PATH}
+
+RUN git clone -c feature.manyFiles=true --depth=2 https://github.com/spack/spack.git ${SPACK_ROOT} \
+    && . ${SPACK_ROOT}/share/spack/setup-env.sh \
+    && spack install sundials \
+    && spack install sundials~mpi \
+    && spack install nlohmann-json \
+    && spack clean -a
+
+# -----------------------------------------------------------------------------
+# Install PETSc
+# -----------------------------------------------------------------------------
+ENV PETSC_DIR=/opt/petsc
+ENV PETSC_ARCH=arch-linux-c-opt
+ENV PETSC_INSTALL=/opt/petsc-install
+ENV PATH=${PETSC_INSTALL}/bin:${PATH}
+ENV LD_LIBRARY_PATH=${PETSC_INSTALL}/lib:${LD_LIBRARY_PATH}
+# Allow running MPI as root during build (for 'make check' and general usage)
+ENV OMPI_ALLOW_RUN_AS_ROOT=1
+ENV OMPI_ALLOW_RUN_AS_ROOT_CONFIRM=1
+
+RUN git clone -b release https://gitlab.com/petsc/petsc.git ${PETSC_DIR} \
+    && cd ${PETSC_DIR} \
+    # Checkout specific version as per HOWTO (or latest stable release branch)
+    && git checkout v3.22.2 \
+    && ./configure \
+    --prefix=${PETSC_INSTALL} \
+    --with-debugging=0 \
+    --with-shared-libraries=1 \
+    --download-mpich=0 \
+    --download-fblaslapack \
+    --download-hdf5 \
+    --download-metis \
+    --download-parmetis \
+    --download-scalapack \
+    --download-mumps \
+    --download-hypre \
+    --with-openmp=1 \
+    --with-fortran-bindings=0 \
+    && make all check \
+    && make install \
+    # Clean up source to save space if desired (optional, but good for layer size)
+    && rm -rf ${PETSC_DIR}/src ${PETSC_DIR}/docs
 
 # Install Python 3.9.18 as an additional kernel
 RUN add-apt-repository -y ppa:deadsnakes/ppa \
     && apt-get update \
     && apt-get install -y python3.9 python3.9-distutils python3.9-dev \
     && curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py \
-    && python3.9 get-pip.py \
+    && python3.9 get-pip.py --ignore-installed \
     && python3.9 -m pip install ipykernel \
     && python3.9 -m ipykernel install --name python3.9 --display-name "Python 3.9" \
     && rm get-pip.py
@@ -87,55 +152,64 @@ RUN wget -q https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.s
 RUN conda tos accept --override-channels --channel https://repo.anaconda.com/pkgs/main \
     && conda tos accept --override-channels --channel https://repo.anaconda.com/pkgs/r || true
 
-# Create the conda environment from file
-COPY tutorial_Alireza/environment.yml /tmp/environment.yml
-# Install mamba for faster and better dependency resolution
-# Remove expat/libexpat version pins which conflict with vtk (vtk needs libexpat <2.6.0 but env specifies 2.6.1)
-# The solver will automatically install compatible expat versions as transitive dependencies
-RUN conda install -n base -c conda-forge mamba -y \
-    && sed -i '/^  - expat=/d' /tmp/environment.yml \
-    && sed -i '/^  - libexpat=/d' /tmp/environment.yml \
-    && mamba env create -f /tmp/environment.yml \
-    && conda clean -ya
+# # Create the conda environment from file
+# COPY tutorial_Alireza/environment.yml /tmp/environment.yml
+# # Install mamba for faster and better dependency resolution
+# # Remove expat/libexpat version pins which conflict with vtk (vtk needs libexpat <2.6.0 but env specifies 2.6.1)
+# # The solver will automatically install compatible expat versions as transitive dependencies
+# RUN conda install -n base -c conda-forge mamba -y \
+#     && sed -i '/^  - expat=/d' /tmp/environment.yml \
+#     && sed -i '/^  - libexpat=/d' /tmp/environment.yml \
+#     && mamba env create -f /tmp/environment.yml \
+#     && conda clean -ya
 
-# Register the conda environment as a Jupyter kernel
-# We install ipykernel explicitly in the environment to ensure it's available
-RUN /opt/conda/envs/femSolver/bin/pip install ipykernel \
-    && /opt/conda/envs/femSolver/bin/python -m ipykernel install --name femSolver --display-name "Python (femSolver)"
+# # Register the conda environment as a Jupyter kernel
+# # We install ipykernel explicitly in the environment to ensure it's available
+# RUN /opt/conda/envs/femSolver/bin/pip install ipykernel \
+#     && /opt/conda/envs/femSolver/bin/python -m ipykernel install --name femSolver --display-name "Python (femSolver)"
 
-# Verify key packages are installed in the femSolver environment
-RUN /opt/conda/envs/femSolver/bin/python -c "import numpy; print(f'numpy: {numpy.__version__}'); import scipy; print(f'scipy: {scipy.__version__}'); import pyvista; print(f'pyvista: {pyvista.__version__}'); import vtk; print(f'vtk: {vtk.vtkVersion.GetVTKVersion()}'); print('All key packages verified!')"
+# # Verify key packages are installed in the femSolver environment
+# RUN /opt/conda/envs/femSolver/bin/python -c "import numpy; print(f'numpy: {numpy.__version__}'); import scipy; print(f'scipy: {scipy.__version__}'); import pyvista; print(f'pyvista: {pyvista.__version__}'); import vtk; print(f'vtk: {vtk.vtkVersion.GetVTKVersion()}'); print('All key packages verified!')"
 
-# Build VItA library (Virtual ITerative Angiogenesis) with VTK 8.1
-# This generates synthetic vasculature networks as .vtp files
-# Note: VTK 8.1 is built from source (~30+ min on first build)
-WORKDIR /opt/vita
-RUN git clone --depth 1 https://github.com/GonzaloMaso/VItA.git vita_source \
-    && mkdir vita_build \
-    # Fix bug in VItA's dependencies.cmake: -j32 is a make flag, not cmake
-    && sed -i 's/-j32//g' vita_source/dependencies.cmake \
-    # Fix missing symbols in VTK by forcing default visibility
-    && sed -i 's/CMAKE_POSITION_INDEPENDENT_CODE=YES/CMAKE_POSITION_INDEPENDENT_CODE=YES -DCMAKE_CXX_VISIBILITY_PRESET=default/g' vita_source/dependencies.cmake \
-    && cd vita_build \
-    && cmake ../vita_source \
-    -DCMAKE_INSTALL_PREFIX=/opt/vita \
-    -DDOWNLOAD_DEPENDENCIES=ON \
-    -DCMAKE_BUILD_TYPE=Release \
-    && make -j$(nproc) \
-    && make install
+# # Build VItA library (Virtual ITerative Angiogenesis) with VTK 8.1
+# # This generates synthetic vasculature networks as .vtp files
+# # Note: VTK 8.1 is built from source (~30+ min on first build)
+# WORKDIR /opt/vita
+# RUN git clone --depth 1 https://github.com/GonzaloMaso/VItA.git vita_source \
+#     && mkdir vita_build \
+#     # Fix bug in VItA's dependencies.cmake: -j32 is a make flag, not cmake
+#     && sed -i 's/-j32//g' vita_source/dependencies.cmake \
+#     # Fix missing symbols in VTK by forcing default visibility
+#     && sed -i 's/CMAKE_POSITION_INDEPENDENT_CODE=YES/CMAKE_POSITION_INDEPENDENT_CODE=YES -DCMAKE_CXX_VISIBILITY_PRESET=default/g' vita_source/dependencies.cmake \
+#     && cd vita_build \
+#     && cmake ../vita_source \
+#     -DCMAKE_INSTALL_PREFIX=/opt/vita \
+#     -DDOWNLOAD_DEPENDENCIES=ON \
+#     -DCMAKE_BUILD_TYPE=Release \
+#     && make -j$(nproc) \
+#     && make install
 
-# Set VItA environment variables
-ENV VITA_PATH=/opt/vita
-ENV LD_LIBRARY_PATH="${VITA_PATH}/vita_build/lib:${VITA_PATH}/lib:${LD_LIBRARY_PATH}"
+# # Set VItA environment variables
+# ENV VITA_PATH=/opt/vita
+# ENV LD_LIBRARY_PATH="${VITA_PATH}/vita_build/lib:${VITA_PATH}/lib:${LD_LIBRARY_PATH}"
 
-# VItA and VTK specific include/lib vars (moved from docker-compose)
-ENV VTK_INCLUDE_DIRS=${VITA_PATH}/vita_build/include/vtk-8.1
-ENV VITA_INCLUDE_DIRS=${VITA_PATH}/include/vita_source
-ENV VTK_LIBRARY_DIRS=${VITA_PATH}/vita_build/lib
-ENV VITA_LIBRARY_DIRS=${VITA_PATH}/lib
+# # VItA and VTK specific include/lib vars (moved from docker-compose)
+# ENV VTK_INCLUDE_DIRS=${VITA_PATH}/vita_build/include/vtk-8.1
+# ENV VITA_INCLUDE_DIRS=${VITA_PATH}/include/vita_source
+# ENV VTK_LIBRARY_DIRS=${VITA_PATH}/vita_build/lib
+# ENV VITA_LIBRARY_DIRS=${VITA_PATH}/lib
 
-# Add VItA bin to PATH
-ENV PATH="/opt/vita/bin:${PATH}"
+# # Add VItA bin to PATH
+# ENV PATH="/opt/vita/bin:${PATH}"
+
+# # Build example_1 from tutorial_Alireza
+# # Clean up any host build artifacts and build fresh
+# WORKDIR /tutorials/tutorial_Alireza/example_1
+# RUN rm -rf build CMakeCache.txt CMakeFiles \
+#     && mkdir build \
+#     && cd build \
+#     && cmake .. \
+#     && make
 
 # Download and install OpenCOR 0.8.3
 WORKDIR /tmp
@@ -173,15 +247,6 @@ RUN sed -i 's|"OpenCOR"|"/opt/OpenCOR/bin/OpenCOR"|g' /opt/OpenCOR/Python/share/
 # Create working directory for notebooks
 WORKDIR /tutorials
 COPY . /tutorials/
-
-# Build example_1 from tutorial_Alireza
-# Clean up any host build artifacts and build fresh
-WORKDIR /tutorials/tutorial_Alireza/example_1
-RUN rm -rf build CMakeCache.txt CMakeFiles \
-    && mkdir build \
-    && cd build \
-    && cmake .. \
-    && make
 
 # Expose Jupyter port
 EXPOSE 8888
