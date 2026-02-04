@@ -43,6 +43,22 @@ To run this project, you need to have **Docker** and **Docker Compose** installe
   - Install the [Docker Compose plugin](https://docs.docker.com/compose/install/linux/).
   - *Note*: Ensure your user is added to the `docker` group to run commands without `sudo`.
 
+### Potential errors:
+
+If you get the following error when installing docker in Ubuntu:
+
+`E: Conflicting values set for option Signed-By regarding source https://download.docker.com/linux/ubuntu/ jammy: /etc/apt/keyrings/docker.gpg != /etc/apt/keyrings/docker.asc
+E: The list of sources could not be read.`
+
+Then try:
+
+`sudo rm /etc/apt/sources.list.d/docker.list`
+
+Then run 
+
+`sudo apt update`
+
+
 ## Getting Started
 
 ### Local Development
