@@ -132,44 +132,6 @@ ENV VITA_INCLUDE_DIRS=${VITA_PATH}/include/vita_source
 ENV VTK_LIBRARY_DIRS=${VITA_PATH}/vita_build/lib
 ENV VITA_LIBRARY_DIRS=${VITA_PATH}/lib
 
-# Create VItA example compilation helper script
-RUN mkdir -p /opt/vita/bin && echo '#!/bin/bash\n\
-    # VItA Example Compiler and Runner\n\
-    # Usage: run_vita_example <example.cpp> [output_dir]\n\
-    \n\
-    EXAMPLE=$1\n\
-    OUTPUT_DIR=${2:-$(pwd)}\n\
-    \n\
-    if [ -z "$EXAMPLE" ]; then\n\
-    echo "Usage: run_vita_example <example.cpp> [output_dir]"\n\
-    exit 1\n\
-    fi\n\
-    \n\
-    g++ "$EXAMPLE" -Wall -std=c++11 -O3 \\\n\
-    -I/opt/vita/vita_build/include/vtk-8.1 \\\n\
-    -I/opt/vita/include/vita_source \\\n\
-    -L/opt/vita/vita_build/lib \\\n\
-    -L/opt/vita/lib \\\n\
-    -o /tmp/vita_example \\\n\
-    -lVItA \\\n\
-    -lvtkCommonCore-8.1 \\\n\
-    -lvtkCommonDataModel-8.1 \\\n\
-    -lvtkCommonExecutionModel-8.1 \\\n\
-    -lvtkFiltersModeling-8.1 \\\n\
-    -lvtkIOCore-8.1 \\\n\
-    -lvtkIOLegacy-8.1 \\\n\
-    -lvtkIOXML-8.1 \\\n\
-    -lvtkIOGeometry-8.1 \\\n\
-    -lvtkInfovisCore-8.1 \\\n\
-    -lvtkFiltersGeneral-8.1 \\\n\
-    -lvtkFiltersCore-8.1 \\\n\
-    -lvtkCommonTransforms-8.1 \\\n\
-    -lvtkIOXMLParser-8.1\n\
-    \n\
-    cd "$OUTPUT_DIR"\n\
-    /tmp/vita_example\n\
-    ' > /opt/vita/bin/run_vita_example && chmod +x /opt/vita/bin/run_vita_example
-
 # Add VItA bin to PATH
 ENV PATH="/opt/vita/bin:${PATH}"
 
@@ -201,14 +163,6 @@ RUN sed -i 's|"OpenCOR"|"/opt/OpenCOR/bin/OpenCOR"|g' /opt/OpenCOR/Python/share/
 # Create working directory for notebooks
 WORKDIR /tutorials
 COPY . /tutorials/
-
-WORKDIR /tutorials/tutorial_Alireza
-RUN git clone -b min_lab_use https://github.com/Cameron-Apeldoorn/MicrovascularModelling.git
-
-WORKDIR /tutorials/tutorial_5
-RUN git clone -b devel_interactive_tutorial https://github.com/FinbarArgus/circulatory_autogen.git
-
-WORKDIR /tutorials
 
 # Expose Jupyter port
 EXPOSE 8888
