@@ -40,7 +40,7 @@ void vascularise(string output_filename, AbstractConstraintFunction<double, int>
     point x0 {0.99, 0.99, -0.0005};
     
     // Number of terminals to be generated
-    long long int n_term {500};
+    long long int n_term {10};
     // Domain geometry
     string input_vtk = "ex1_simple2D.vtk";
     

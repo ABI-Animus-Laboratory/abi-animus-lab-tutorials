@@ -7,33 +7,28 @@ project(example_1)
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 
-# add all libraries needed for compilation
-set(VTK_8_1_libs vtkCommonCore-8.1 vtkCommonDataModel-8.1 vtkCommonExecutionModel-8.1 vtkFiltersModeling-8.1 vtkIOCore-8.1 vtkIOLegacy-8.1 vtkIOXML-8.1 vtkIOGeometry-8.1 vtkInfovisCore-8.1 vtkFiltersGeneral-8.1 vtkFiltersCore-8.1 vtkCommonTransforms-8.1 vtkIOXMLParser-8.1)
+# Find VTK
+find_package(VTK REQUIRED HINTS "$ENV{VITA_PATH}/vita_build/lib/cmake/vtk-8.1" "/opt/vita/vita_build/lib/cmake/vtk-8.1")
+include(${VTK_USE_FILE})
 
+# Find VItA
 find_path(VITA_INCLUDE_DIRS core/GeneratorData.h
-          HINTS .. ENV VITA_PATH
-          PATH_SUFFIXES include/vita_source )
-find_path(VITA_LIBRARY_DIRS libVItA.a libVItA.so
-          HINTS .. ENV VITA_PATH
-          PATH_SUFFIXES lib )
-find_path(VTK_INCLUDE_DIRS vtkAbstractArray.h
-          HINTS .. ENV VITA_PATH /usr/local/
-          PATH_SUFFIXES vita_build/include/vtk-8.1 include/vtk-8.1)
-find_path(VTK_LIBRARY_DIRS libvtkCommonCore-8.1.so
-          HINTS .. ENV VITA_PATH /usr/local/
-          PATH_SUFFIXES vita_build/lib lib)
+          HINTS "$ENV{VITA_PATH}"
+          PATH_SUFFIXES include/vita_source)
 
-link_directories(${VITA_LIBRARY_DIRS} ${VTK_LIBRARY_DIRS})
+find_library(VITA_LIBRARY NAMES VItA
+             HINTS "$ENV{VITA_PATH}"
+             PATH_SUFFIXES lib)
+
+if(NOT VITA_INCLUDE_DIRS OR NOT VITA_LIBRARY)
+    message(FATAL_ERROR "VItA not found. Please set VITA_PATH environment variable.")
+endif()
+
+# add all include directories needed for compilation
+include_directories(${VITA_INCLUDE_DIRS} ${VTK_INCLUDE_DIRS})
 
 # add the executable
 add_executable(example_1 example_1.cpp)
 
 # link libraries
-target_link_libraries(example_1 VItA ${VTK_8_1_libs})
-
-# add all include directories needed for compilation
-target_include_directories(example_1 PUBLIC
-                           "${VITA_INCLUDE_DIRS}"
-                           "${VTK_INCLUDE_DIRS}"
-                           )
-
+target_link_libraries(example_1 ${VITA_LIBRARY} ${VTK_LIBRARIES})
