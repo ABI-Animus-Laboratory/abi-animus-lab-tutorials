@@ -166,6 +166,15 @@ RUN sed -i 's|"OpenCOR"|"/opt/OpenCOR/bin/OpenCOR"|g' /opt/OpenCOR/Python/share/
 WORKDIR /tutorials
 COPY . /tutorials/
 
+# Build example_1 from tutorial_Alireza
+# Clean up any host build artifacts and build fresh
+WORKDIR /tutorials/tutorial_Alireza/example_1
+RUN rm -rf build CMakeCache.txt CMakeFiles \
+    && mkdir build \
+    && cd build \
+    && cmake .. \
+    && make
+
 # Expose Jupyter port
 EXPOSE 8888
 
