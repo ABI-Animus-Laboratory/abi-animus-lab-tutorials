@@ -51,7 +51,7 @@ To start the environment locally for development:
 
 1.  Clone the repository:
     ```bash
-    git clone https://github.com/your-username/abi-animus-lab-tutorials.git
+    git clone https://github.com/ABI-Animus-Laboratory/abi-animus-lab-tutorials.git
     cd abi-animus-lab-tutorials
     ```
 
