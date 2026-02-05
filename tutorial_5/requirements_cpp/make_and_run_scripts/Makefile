@@ -5,8 +5,8 @@ CXX = g++
 CXXFLAGS = -Wall -O2 -std=c++17 $(INC_DIR)
 
 # SUNDIALS paths from Spack
-SUNDIALS_PREFIX := $(shell spack location -i sundials)
-# SUNDIALS_PREFIX := $(shell spack location -i sundials~mpi)
+# SUNDIALS_PREFIX := $(shell spack location -i sundials)
+SUNDIALS_PREFIX := $(shell spack location -i sundials~mpi)
 INC_DIR = -I$(SUNDIALS_PREFIX)/include
 LIB_DIR = -L$(SUNDIALS_PREFIX)/lib
 
