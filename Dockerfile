@@ -162,63 +162,24 @@ RUN conda create -n tutorial_4 python=3.12.2 -y \
     && conda run -n tutorial_4 python -m ipykernel install --name tutorial_4 --display-name "Python (Tutorial 4)" \
     && conda clean -ya
 
-# Create the conda environment from file
-# Install mamba for faster and better dependency resolution
-# Remove expat/libexpat version pins which conflict with vtk (vtk needs libexpat <2.6.0 but env specifies 2.6.1)
-# The solver will automatically install compatible expat versions as transitive dependencies
-RUN conda install -n base -c conda-forge mamba -y \
-    && sed -i '/^  - expat=/d' /tutorials/tutorial_Alireza/environment.yml \
-    && sed -i '/^  - libexpat=/d' /tutorials/tutorial_Alireza/environment.yml \
-    && mamba env create -f /tutorials/tutorial_Alireza/environment.yml \
-    && conda clean -ya
+# for tutorial 6
+# # Create the conda environment from file
+# # Install mamba for faster and better dependency resolution
+# # Remove expat/libexpat version pins which conflict with vtk (vtk needs libexpat <2.6.0 but env specifies 2.6.1)
+# # The solver will automatically install compatible expat versions as transitive dependencies
+# RUN conda install -n base -c conda-forge mamba -y \
+#     && sed -i '/^  - expat=/d' /tutorials/tutorial_6/environment.yml \
+#     && sed -i '/^  - libexpat=/d' /tutorials/tutorial_6/environment.yml \
+#     && mamba env create -f /tutorials/tutorial_6/environment.yml \
+#     && conda clean -ya
 
-# Register the conda environment as a Jupyter kernel
-# We install ipykernel explicitly in the environment to ensure it's available
-RUN /opt/conda/envs/femSolver/bin/pip install ipykernel \
-    && /opt/conda/envs/femSolver/bin/python -m ipykernel install --name femSolver --display-name "Python (femSolver)"
+# # Register the conda environment as a Jupyter kernel
+# # We install ipykernel explicitly in the environment to ensure it's available
+# RUN /opt/conda/envs/femSolver/bin/pip install ipykernel \
+#     && /opt/conda/envs/femSolver/bin/python -m ipykernel install --name femSolver --display-name "Python (femSolver)"
 
-# Verify key packages are installed in the femSolver environment
-RUN /opt/conda/envs/femSolver/bin/python -c "import numpy; print(f'numpy: {numpy.__version__}'); import scipy; print(f'scipy: {scipy.__version__}'); import pyvista; print(f'pyvista: {pyvista.__version__}'); import vtk; print(f'vtk: {vtk.vtkVersion.GetVTKVersion()}'); print('All key packages verified!')"
-
-# Build VItA library (Virtual ITerative Angiogenesis) with VTK 8.1
-# This generates synthetic vasculature networks as .vtp files
-# Note: VTK 8.1 is built from source (~30+ min on first build)
-WORKDIR /opt/vita
-RUN git clone --depth 1 https://github.com/GonzaloMaso/VItA.git vita_source \
-    && mkdir vita_build \
-    # Fix bug in VItA's dependencies.cmake: -j32 is a make flag, not cmake
-    && sed -i 's/-j32//g' vita_source/dependencies.cmake \
-    # Fix missing symbols in VTK by forcing default visibility
-    && sed -i 's/CMAKE_POSITION_INDEPENDENT_CODE=YES/CMAKE_POSITION_INDEPENDENT_CODE=YES -DCMAKE_CXX_VISIBILITY_PRESET=default/g' vita_source/dependencies.cmake \
-    && cd vita_build \
-    && cmake ../vita_source \
-    -DCMAKE_INSTALL_PREFIX=/opt/vita \
-    -DDOWNLOAD_DEPENDENCIES=ON \
-    -DCMAKE_BUILD_TYPE=Release \
-    && make -j$(nproc) \
-    && make install
-
-# Set VItA environment variables
-ENV VITA_PATH=/opt/vita
-ENV LD_LIBRARY_PATH="${VITA_PATH}/vita_build/lib:${VITA_PATH}/lib:${LD_LIBRARY_PATH}"
-
-# VItA and VTK specific include/lib vars (moved from docker-compose)
-ENV VTK_INCLUDE_DIRS=${VITA_PATH}/vita_build/include/vtk-8.1
-ENV VITA_INCLUDE_DIRS=${VITA_PATH}/include/vita_source
-ENV VTK_LIBRARY_DIRS=${VITA_PATH}/vita_build/lib
-ENV VITA_LIBRARY_DIRS=${VITA_PATH}/lib
-
-# Add VItA bin to PATH
-ENV PATH="/opt/vita/bin:${PATH}"
-
-# Build example_1 from tutorial_Alireza
-# Clean up any host build artifacts and build fresh
-#WORKDIR /tutorials/tutorial_Alireza/example_1
-#RUN rm -rf build CMakeCache.txt CMakeFiles \
-#    && mkdir build \
-#    && cd build \
-#    && cmake .. \
-#    && make
+# # Verify key packages are installed in the femSolver environment
+# RUN /opt/conda/envs/femSolver/bin/python -c "import numpy; print(f'numpy: {numpy.__version__}'); import scipy; print(f'scipy: {scipy.__version__}'); import pyvista; print(f'pyvista: {pyvista.__version__}'); import vtk; print(f'vtk: {vtk.vtkVersion.GetVTKVersion()}'); print('All key packages verified!')"
 
 # Download and install OpenCOR 0.8.3
 WORKDIR /tmp

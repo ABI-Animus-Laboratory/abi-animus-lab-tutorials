@@ -12,7 +12,7 @@ Welcome to the **ABI Animus Lab Tutorials** repository! This project is a compre
 - [Tutorials Overview](#tutorials-overview)
   - [Tutorial 4: Python Environment](#tutorial-4-python-environment)
   - [Tutorial 5: OpenCOR & Jupyter](#tutorial-5-opencor--jupyter)
-  - [Tutorial Alireza: Advanced C++ & VItA](#tutorial-alireza-advanced-c--vita)
+  - [Tutorial 6: Microvascular Modelling & VItA](#tutorial-6-microvascular-modelling--vita)
 - [Development Notes](#development-notes)
 - [CI/CD](#cicd)
 
@@ -27,8 +27,12 @@ Welcome to the **ABI Animus Lab Tutorials** repository! This project is a compre
 ## Prerequisites
 
 To run this project, you need to have **Docker** and **Docker Compose** installed on your system.
+### git
+### Dsiplay server (X server) (make sure to run it before running the container)
+- **Windows**: https://vcxsrv.com/
+- **Mac**: - 
 
-### Installing Docker & Docker Compose
+### Installing Docker & Docker Compose (make sure to run it before running the container)
 
 - **Windows**:
   - Install [Docker Desktop for Windows](https://docs.docker.com/desktop/install/windows-install/).
@@ -61,8 +65,6 @@ Then run
 
 ## Getting Started
 
-### Local Development
-
 To start the environment locally for development:
 
 1.  Clone the repository:
@@ -71,24 +73,16 @@ To start the environment locally for development:
     cd abi-animus-lab-tutorials
     ```
 
-2.  Build and start the container:
+2.  Run the following command (run the production version (pulling the latest image from GitHub Container Registry):):
     ```bash
-    docker compose up --build
+    docker compose -f docker-compose.prod.yml up -d
     ```
 
 3.  Access Jupyter Lab:
     - Open your browser and navigate to the URL displayed in the terminal (usually `http://127.0.0.1:8888/lab`).
     - The token will be provided in the improved launch logs.
 
-### Production
 
-To run the production version (pulling the latest image from GitHub Container Registry):
-
-1.  Ensure you have the `docker-compose.prod.yml` file.
-2.  Run the following command:
-    ```bash
-    docker compose -f docker-compose.prod.yml up -d
-    ```
 
 ## Tutorials Overview
 
@@ -102,27 +96,19 @@ Located in `tutorial_5/`, this tutorial demonstrates the integration of OpenCOR 
 - **Key Files**: `test_opencor.ipynb`, `tutorial_5.ipynb`.
 - **Topics**: Launching OpenCOR from a notebook, scripting OpenCOR tasks.
 
-### Tutorial Alireza: Advanced C++ & VItA
-Located in `tutorial_Alireza/`, this section contains advanced C++ examples leveraging the VItA library for vascular generation.
-- **Key Files**: `example_1/`, `tutorial_Alireza.ipynb`.
-- **Topics**: Building C++ projects with CMake, linking against VItA and VTK, running MPI simulations.
+### Tutorial 6: Microvascular Modelling & VItA
+Located in `tutorial_6/`, this section contains advanced examples leveraging the VItA library for vascular generation.
+- **Key Files**: `test.ipynb`, `vital_multiscale/`.
+- **Topics**: Microvascular modelling, VItA integration.
 
 ## Development Notes
 
 ### Rebuilding C++ Examples
 
-Since the C++ examples (like `tutorial_Alireza/example_1`) depend on libraries install inside the container, it is recommended to build them within the Docker environment.
-
+If you need to rebuild C++/VItA examples, ensure you are in the correct build directory within the container.
 1.  Open a terminal in Jupyter Lab (or attach to the running container).
-2.  Navigate to the build directory:
-    ```bash
-    cd /home/jovyan/work/tutorial_Alireza/example_1/build
-    ```
-3.  Run CMake and Make:
-    ```bash
-    cmake ..
-    make
-    ```
+2.  Navigate to the build directory (e.g., inside `tutorial_6/vital_multiscale` or similar if applicable, checking structure).
+    *Note: Specific build paths may vary based on the tutorial's internal structure.*
 
 ## CI/CD
 

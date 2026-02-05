@@ -21,7 +21,7 @@ LDLIBS = -lsundials_cvodes \
          -lm
 
 # Source files
-SRCS = main0d.cpp model0d.cc
+SRCS = main0d.cpp #model0d.cc
 # Object files (auto-generated from SRCS)
 OBJS := $(SRCS:.cpp=.o) # OBJS = $(SRCS:.cpp=.o)
 OBJS := $(OBJS:.cc=.o)
