@@ -12,7 +12,7 @@ Welcome to the **ABI Animus Lab Tutorials** repository! This project is a compre
 - [Tutorials Overview](#tutorials-overview)
   - [Tutorial 4: Python Environment](#tutorial-4-python-environment)
   - [Tutorial 5: OpenCOR & Jupyter](#tutorial-5-opencor--jupyter)
-  - [Tutorial Alireza: Advanced C++ & VItA](#tutorial-alireza-advanced-c--vita)
+  - [Tutorial 6: Microvascular Modelling & VItA](#tutorial-6-microvascular-modelling--vita)
 - [Development Notes](#development-notes)
 - [CI/CD](#cicd)
 
@@ -86,27 +86,19 @@ Located in `tutorial_5/`, this tutorial demonstrates the integration of OpenCOR 
 - **Key Files**: `test_opencor.ipynb`, `tutorial_5.ipynb`.
 - **Topics**: Launching OpenCOR from a notebook, scripting OpenCOR tasks.
 
-### Tutorial Alireza: Advanced C++ & VItA
-Located in `tutorial_Alireza/`, this section contains advanced C++ examples leveraging the VItA library for vascular generation.
-- **Key Files**: `example_1/`, `tutorial_Alireza.ipynb`.
-- **Topics**: Building C++ projects with CMake, linking against VItA and VTK, running MPI simulations.
+### Tutorial 6: Microvascular Modelling & VItA
+Located in `tutorial_6/`, this section contains advanced examples leveraging the VItA library for vascular generation.
+- **Key Files**: `test.ipynb`, `vital_multiscale/`.
+- **Topics**: Microvascular modelling, VItA integration.
 
 ## Development Notes
 
 ### Rebuilding C++ Examples
 
-Since the C++ examples (like `tutorial_Alireza/example_1`) depend on libraries install inside the container, it is recommended to build them within the Docker environment.
-
+If you need to rebuild C++/VItA examples, ensure you are in the correct build directory within the container.
 1.  Open a terminal in Jupyter Lab (or attach to the running container).
-2.  Navigate to the build directory:
-    ```bash
-    cd /home/jovyan/work/tutorial_Alireza/example_1/build
-    ```
-3.  Run CMake and Make:
-    ```bash
-    cmake ..
-    make
-    ```
+2.  Navigate to the build directory (e.g., inside `tutorial_6/vital_multiscale` or similar if applicable, checking structure).
+    *Note: Specific build paths may vary based on the tutorial's internal structure.*
 
 ## CI/CD
 
