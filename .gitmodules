@@ -9,3 +9,4 @@
 [submodule "tutorial_6/vital_multiscale"]
 	path = tutorial_6/vital_multiscale
 	url = https://github.com/AlirezaSharif/vital_multiscale.git
+	branch = main
