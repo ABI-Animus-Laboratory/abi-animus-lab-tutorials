@@ -27,8 +27,12 @@ Welcome to the **ABI Animus Lab Tutorials** repository! This project is a compre
 ## Prerequisites
 
 To run this project, you need to have **Docker** and **Docker Compose** installed on your system.
+### git
+### Dsiplay server (X server) (make sure to run it before running the container)
+- **Windows**: https://vcxsrv.com/
+- **Mac**: - 
 
-### Installing Docker & Docker Compose
+### Installing Docker & Docker Compose (make sure to run it before running the container)
 
 - **Windows**:
   - Install [Docker Desktop for Windows](https://docs.docker.com/desktop/install/windows-install/).
@@ -45,8 +49,6 @@ To run this project, you need to have **Docker** and **Docker Compose** installe
 
 ## Getting Started
 
-### Local Development
-
 To start the environment locally for development:
 
 1.  Clone the repository:
@@ -55,24 +57,16 @@ To start the environment locally for development:
     cd abi-animus-lab-tutorials
     ```
 
-2.  Build and start the container:
+2.  Run the following command (run the production version (pulling the latest image from GitHub Container Registry):):
     ```bash
-    docker compose up --build
+    docker compose -f docker-compose.prod.yml up -d
     ```
 
 3.  Access Jupyter Lab:
     - Open your browser and navigate to the URL displayed in the terminal (usually `http://127.0.0.1:8888/lab`).
     - The token will be provided in the improved launch logs.
 
-### Production
 
-To run the production version (pulling the latest image from GitHub Container Registry):
-
-1.  Ensure you have the `docker-compose.prod.yml` file.
-2.  Run the following command:
-    ```bash
-    docker compose -f docker-compose.prod.yml up -d
-    ```
 
 ## Tutorials Overview
 
