@@ -93,6 +93,10 @@ To start the environment locally for development:
     ```
 *Note*: Since you are not building the Docker images locally in your machine, restart from step 2 everytime you shut down the Container or your machine.
 
+### Tutorial 6
+
+Navigate to the folder `tutorial_6/vital_multiscale` and follow the instructions in the corresponding `README.md` file.
+
 ## Tutorials Overview
 
 ### Tutorial 4: Python Environment
