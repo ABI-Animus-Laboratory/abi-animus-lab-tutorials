@@ -116,6 +116,13 @@ Located in `tutorial_6/`, this section contains advanced examples leveraging the
 
 ## Development Notes
 
+### Local Development
+
+To start the environment locally for development, **build** and start the container:
+```bash
+docker compose up --build
+```
+
 ### Rebuilding C++ Examples
 
 If you need to rebuild C++/VItA examples, ensure you are in the correct build directory within the container.
