@@ -57,6 +57,14 @@ Make sure you have git installed on your laptop: https://git-scm.com/
   - Install [Docker Engine](https://docs.docker.com/engine/install/) for your distribution.
   - Install the [Docker Compose plugin](https://docs.docker.com/compose/install/linux/).
   - *Note*: Ensure your user is added to the `docker` group to run commands without `sudo`.
+    ```bash
+    sudo usermod -aG docker $USER
+    newgrp docker
+    ```
+    To test it, run:
+    ```bash
+    docker run hello-world
+    ```
 
 ## Getting Started
 
