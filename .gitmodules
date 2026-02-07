@@ -3,10 +3,10 @@
 	url = https://github.com/Cameron-Apeldoorn/MicrovascularModelling.git
 	branch = min_lab_use
 [submodule "tutorial_5/circulatory_autogen"]
-	path = tutorial_5/circulatory_autogen
+	path = tutorial_2_5_Argus_Ghitti_Davis/circulatory_autogen
 	url = https://github.com/FinbarArgus/circulatory_autogen.git
 	branch = devel_interactive_tutorial
 [submodule "tutorial_6/vital_multiscale"]
-	path = tutorial_6/vital_multiscale
+	path = tutorial_6_MasoTalou_SharifzadehKermani/vital_multiscale
 	url = https://github.com/AlirezaSharif/vital_multiscale.git
 	branch = main
