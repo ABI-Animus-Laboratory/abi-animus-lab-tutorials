@@ -38,10 +38,6 @@ Make sure you have git installed on your laptop: https://git-scm.com/
     ```bash
     xhost +localhost
     ```
-- **Linux**: to launch GUI applications (Fiji/ImageJ and ilastik) from inside the Docker container, on a terminal (on your physical machine) run:
-    ```bash
-    xhost +local:docker
-    ```
 
 *Note*: Ensure you run this server before running the Docker container.
 
@@ -69,6 +65,10 @@ Make sure you have git installed on your laptop: https://git-scm.com/
     To test it, run:
     ```bash
     docker run hello-world
+    ```
+  - To launch GUI applications (Fiji/ImageJ and ilastik) from inside the Docker container, on a terminal (on your physical machine) run:
+    ```bash
+    xhost +local:docker
     ```
 
 ## Getting Started
