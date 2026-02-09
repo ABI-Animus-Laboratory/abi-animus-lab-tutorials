@@ -124,7 +124,7 @@ To start the environment locally for development:
 
 ### Tutorial 6
 
-Navigate to the folder `tutorial_6/vital_multiscale` and follow the instructions in the corresponding `README.md` file.
+Please go to this link: https://github.com/AlirezaSharif/vital_multiscale
 
 ## Tutorials Overview
 
@@ -139,8 +139,7 @@ Located in `tutorial_5/`, this tutorial demonstrates the integration of OpenCOR 
 - **Topics**: Launching OpenCOR from a notebook, scripting OpenCOR tasks.
 
 ### Tutorial 6: Microvascular Modelling & VItA
-Located in `tutorial_6/`, this section contains advanced examples leveraging the VItA library for vascular generation.
-- **Key Files**: `test.ipynb`, `vital_multiscale/`.
+Please visit https://github.com/AlirezaSharif/vital_multiscale.
 - **Topics**: Microvascular modelling, VItA integration.
 
 ## Development Notes
