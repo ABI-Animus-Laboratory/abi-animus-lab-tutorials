@@ -71,6 +71,22 @@ Make sure you have git installed on your laptop: https://git-scm.com/
     xhost +local:docker
     ```
 
+### Potential errors:
+
+If you get the following error when installing docker in Ubuntu:
+
+`E: Conflicting values set for option Signed-By regarding source https://download.docker.com/linux/ubuntu/ jammy: /etc/apt/keyrings/docker.gpg != /etc/apt/keyrings/docker.asc
+E: The list of sources could not be read.`
+
+Then try:
+
+`sudo rm /etc/apt/sources.list.d/docker.list`
+
+Then run 
+
+`sudo apt update`
+
+
 ## Getting Started
 
 To start the environment locally for development:
@@ -108,7 +124,7 @@ To start the environment locally for development:
 
 ### Tutorial 6
 
-Navigate to the folder `tutorial_6/vital_multiscale` and follow the instructions in the corresponding `README.md` file.
+Please go to this link: https://github.com/AlirezaSharif/vital_multiscale
 
 ## Tutorials Overview
 
@@ -123,8 +139,7 @@ Located in `tutorial_5/`, this tutorial demonstrates the integration of OpenCOR 
 - **Topics**: Launching OpenCOR from a notebook, scripting OpenCOR tasks.
 
 ### Tutorial 6: Microvascular Modelling & VItA
-Located in `tutorial_6/`, this section contains advanced examples leveraging the VItA library for vascular generation.
-- **Key Files**: `test.ipynb`, `vital_multiscale/`.
+Please visit https://github.com/AlirezaSharif/vital_multiscale.
 - **Topics**: Microvascular modelling, VItA integration.
 
 ## Development Notes
